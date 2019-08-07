@@ -14,6 +14,8 @@ HEADERS = {
 DATE_FMT = '%Y/%m/%dZ'
 VALUE_AMOUNT = 1_000_000
 
+PICKLE_NAME = 'value_change_to_next_month.pickle'
+
 
 def get_first_month():
     r = requests.post(ROOT_URL + 'GetFirstMonth',
@@ -72,12 +74,12 @@ def retrieve_and_dump_stats_to_file(months_step: int):
 
     pprint(month_to_change)
 
-    with open('value_change_to_next_month.pickle', 'wb') as f:
+    with open(PICKLE_NAME, 'wb') as f:
         pickle.dump(month_to_change, f)
 
 
 def load_from_file():
-    with open('value_change_to_next_month.pickle', 'rb') as f:
+    with open(PICKLE_NAME, 'rb') as f:
         month_to_change = pickle.load(f)
     return month_to_change
 
@@ -96,8 +98,8 @@ def get_value_changes(start_month: datetime.date, end_month: datetime.date):
 
 
 if __name__ == '__main__':
-    # retrieve_and_dump_stats_to_file(1)
+    retrieve_and_dump_stats_to_file(1)
 
-    coefficients = get_value_changes(datetime.date(2016, 1, 17), datetime.date(2019, 5, 25))
+    # coefficients = get_value_changes(datetime.date(2016, 1, 17), datetime.date(2019, 5, 25))
 
-    pprint(coefficients)
+    # pprint(coefficients)
