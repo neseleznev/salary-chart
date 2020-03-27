@@ -3,7 +3,7 @@
 The very beta shitty version is here
 
 ```{sh}
-pip3 install -r requirements.txt
+pip3 install -U -r requirements.txt
 python3 chart_builder.py
 ```
 

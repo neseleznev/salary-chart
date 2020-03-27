@@ -5,9 +5,9 @@ from pprint import pprint
 
 import requests
 
-from date_util import month_generator
+from date_util import month_generator, add_months
 
-ROOT_URL = 'http://уровень-инфляции.рф/DesktopModules/WebServices.asmx/'
+ROOT_URL = 'https://www.statbureau.org/'
 HEADERS = {
     'Content-Type': 'application/json; charset=utf-8'
 }
@@ -17,22 +17,18 @@ VALUE_AMOUNT = 1_000_000
 PICKLE_NAME = 'value_change_to_next_month.pickle'
 
 
-def get_first_month():
-    r = requests.post(ROOT_URL + 'GetFirstMonth',
+def get_available_months():
+    r = requests.post(ROOT_URL + 'get-data-json',
+                      json={
+                          'country': 'russia'
+                      },
                       headers=HEADERS)
-    ugly_date = r.json()['d']
-    unix_time = int(ugly_date[6:-2]) / 1000
-    dt = datetime.datetime.fromtimestamp(unix_time) \
-        .astimezone(datetime.timezone.utc) \
-        .date()
-    return dt
+    dates = list(map(data_entry_to_date, r.json()))
+    return min(dates), max(dates)
 
 
-def get_last_month():
-    r = requests.post(ROOT_URL + 'GetLastMonth',
-                      headers=HEADERS)
-    ugly_date = r.json()['d']
-    unix_time = int(ugly_date[6:-2]) / 1000
+def data_entry_to_date(data_entry):
+    unix_time = int(data_entry['Month'][6:-2]) / 1000
     dt = datetime.datetime.fromtimestamp(unix_time) \
         .astimezone(datetime.timezone.utc) \
         .date()
@@ -47,21 +43,24 @@ def pairwise(iterable):
 
 
 def get_value_change(start_month: datetime.date, end_month: datetime.date):
-    r = requests.post(ROOT_URL + 'GetValueChange', json={
-        'startMonth': start_month.strftime(DATE_FMT),
-        'endMonth': end_month.strftime(DATE_FMT),
-        'startAmount': str(VALUE_AMOUNT),
-        'applyDenominationOf1998': 'true'
-    }, headers=HEADERS)
-    change = r.json()['d'] / VALUE_AMOUNT
+    r = requests.post(ROOT_URL + 'calculate-inflation-value-json',
+                      json={
+                          'country': 'russia',
+                          'start': start_month.strftime(DATE_FMT),
+                          'end': add_months(end_month, -1).strftime(DATE_FMT),
+                          'amount': str(VALUE_AMOUNT),
+                          'denominationsToApply': '1998-1-1'
+                      },
+                      headers=HEADERS)
+    change = float(r.json()[:-2].replace(' ', '')) / VALUE_AMOUNT
     return change
 
 
 def retrieve_and_dump_stats_to_file(months_step: int):
     month_to_change = dict()
 
-    first_month = get_first_month()
-    last_month = get_last_month()
+    first_month, last_month = get_available_months()
+
     for start_month, next_month in pairwise(month_generator(first_month, last_month, months_step)):
         print(start_month)
         print(next_month)
