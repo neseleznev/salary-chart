@@ -169,7 +169,7 @@ def draw_usd_line(data: EmploymentData, axis):
 
     axis.step(main_data.begin_labels, main_data.amounts,
               color=USD_COLOR,
-              label=USD_SALARY_LABEL, alpha=0.45)
+              label=USD_SALARY_LABEL, alpha=1.0)
 
 
 def draw_increase_carets(data: GraphData, axis, max_count: int = None):
