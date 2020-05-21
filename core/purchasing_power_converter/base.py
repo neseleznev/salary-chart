@@ -15,7 +15,7 @@ class BasePurchasingPowerSalaryConverter:
             try:
                 value_change = changes[idx]
                 result[month] = amount * value_change
-            except IndexError:
+            except (IndexError, TypeError):
                 result[month] = None  # No more data, return truthy None
 
         return result

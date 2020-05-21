@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import math
-from datetime import date, datetime
+from datetime import date
 from statistics import mode
 from typing import List, Any, Dict
 
@@ -9,10 +9,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from core.currency_converter import CurrencySalaryConverter
+from core.date_util import month_generator
 from core.models import EmploymentPeriod, Salary, Currency
 from core.purchasing_power_converter import purchasing_power_converters
 from core.salary_calculator.salary_calculator import SalaryCalculator
-from core.date_util import month_generator
 
 # TITLE = 'Your relative salary'
 TITLE = 'Относительная з/п'
@@ -50,8 +50,8 @@ class GraphData:
         self._salary = {key: value for key, value in salary.items() if value is not None}
 
     @property
-    def begin_labels(self):
-        return list(map(lambda dt: dt.strftime(YEAR_MONTH_FMT), self._salary.keys()))
+    def months(self):
+        return list(self._salary.keys())
 
     @property
     def amounts(self):
@@ -63,12 +63,12 @@ class EmploymentData:
         self._periods = periods
         self._salary_calculator = salary_calculator
 
-        self._month_labels = []
-        self._init_month_labels()
+        self._months = []
+        self._init_months()
 
     @property
-    def month_labels(self):
-        return self._month_labels.copy()
+    def months(self):
+        return self._months.copy()
 
     def salaries(self, new_currency: Currency) -> GraphData:
         return GraphData(self._salaries(new_currency))
@@ -86,11 +86,11 @@ class EmploymentData:
     def most_frequent_currency(self) -> Currency:
         return mode([x.salary.currency for x in self._periods])
 
-    def _init_month_labels(self):
+    def _init_months(self):
         begin = self._begin_date()
         end = self._end_date()
         for month in month_generator(begin, end):
-            self._month_labels.append(month.strftime(YEAR_MONTH_FMT))
+            self._months.append(month)
 
     def _begin_date(self):
         return min(p.begin for p in self._periods)
@@ -101,10 +101,6 @@ class EmploymentData:
 
 def filter_by_indices(values: List[Any], indices: List[int]):
     return [val for idx, val in enumerate(values) if idx in indices]
-
-
-def format_labels(dates: List[date]) -> List[str]:
-    return [d.strftime(YEAR_MONTH_FMT) for d in dates]
 
 
 def build_graph(salary_data: List[EmploymentPeriod]):
@@ -120,16 +116,19 @@ def build_graph(salary_data: List[EmploymentPeriod]):
 
     plt.title(TITLE, fontsize=22)
     y_axis1.set_xlabel(X_AXIS_LABEL)
-    stylize_x_ticks(45)
+
+    fig.autofmt_xdate()
 
     draw_main_currency_line(data, y_axis1)
     draw_value_change_line(data, y_axis1)
 
     # instantiate a second axes that shares the same x-axis
     y_axis2 = y_axis1.twinx()
-    draw_usd_line(data, y_axis2)
 
-    draw_x_ticks(y_axis1.xaxis, data.month_labels, 20)
+    y_axis1.grid(True)
+    y_axis2.grid(True)
+
+    draw_usd_line(data, y_axis2)
 
     add_legends(y_axis1, y_axis2)
     stylize_plot()
@@ -144,7 +143,7 @@ def draw_main_currency_line(data: EmploymentData, axis):
     axis.set_ylabel(main_currency.name, color=MAIN_CURRENCY_COLOR)
     axis.tick_params(axis='y', labelcolor=MAIN_CURRENCY_COLOR)
 
-    axis.step(main_data.begin_labels, main_data.amounts,
+    axis.step(main_data.months, main_data.amounts,
               color=MAIN_CURRENCY_COLOR,
               label=f'{MAIN_CURRENCY_SALARY_LABEL} ({main_currency.name})')
 
@@ -155,10 +154,10 @@ def draw_main_currency_line(data: EmploymentData, axis):
 def draw_value_change_line(data: EmploymentData, axis):
     data = data.value_change()
 
-    axis.step(data.begin_labels, data.amounts,
+    axis.step(data.months, data.amounts,
               color=VALUE_CHANGE_COLOR,
               label=VALUE_CHANGE_LABEL)
-    plt.axvline(data.begin_labels[-1], 0, 1, label=LATEST_VALUE_CHANGE_DATA_LABEL, c=LATEST_VALUE_CHANGE_COLOR)
+    plt.axvline(data.months[-1], 0, 1, label=LATEST_VALUE_CHANGE_DATA_LABEL, c=LATEST_VALUE_CHANGE_COLOR)
 
 
 def draw_usd_line(data: EmploymentData, axis):
@@ -167,7 +166,7 @@ def draw_usd_line(data: EmploymentData, axis):
     axis.set_ylabel(Currency.USD.name, color=USD_COLOR)
     axis.tick_params(axis='y', labelcolor=USD_COLOR)
 
-    axis.step(main_data.begin_labels, main_data.amounts,
+    axis.step(main_data.months, main_data.amounts,
               color=USD_COLOR,
               label=USD_SALARY_LABEL, alpha=1.0)
 
@@ -190,7 +189,7 @@ def draw_change_carets(data: GraphData, axis,
     if max_count:
         filter_uniformly(change_locations, max_count)
 
-    axis.scatter(filter_by_indices(data.begin_labels, change_locations),
+    axis.scatter(filter_by_indices(data.months, change_locations),
                  filter_by_indices(data.amounts, change_locations),
                  marker=marker, color=color, s=100, label=label)
 
@@ -198,8 +197,8 @@ def draw_change_carets(data: GraphData, axis,
     amount_label_shift = diff_sign * amount_range * AMOUNT_LABEL_SHIFT_RATIO
 
     for t in change_locations:
-        axis.text(data.begin_labels[t], data.amounts[t] + amount_label_shift,
-                  data.begin_labels[t], horizontalalignment='center', color=caret_color)
+        axis.text(data.months[t], data.amounts[t] + amount_label_shift,
+                  data.months[t].strftime(YEAR_MONTH_FMT), horizontalalignment='center', color=caret_color)
 
 
 def get_change_locations(amounts: List[int], diff_sign: int) -> List[int]:
@@ -223,28 +222,12 @@ def filter_uniformly(lst: list, count: int):
     return lst[::slice_step]
 
 
-def stylize_x_ticks(rotation: int = 0):
-    plt.xticks(rotation=rotation, fontsize=12, alpha=.7)
-
-
-def draw_x_ticks(x_axis, date_labels: List[str], max_count: int = None):
-    x_tick_location = list(range(len(date_labels)))
-
-    if max_count:
-        x_tick_location = filter_uniformly(x_tick_location, max_count)
-
-    x_axis.set_ticks(ticks=x_tick_location)
-
-
 def add_legends(axis1, axis2):
     axis1.legend(loc='upper left')
     axis2.legend(loc='lower right')
 
 
 def stylize_plot():
-    # plt.ylim(0)
-    # plt.yticks(fontsize=12, alpha=.7)
-
     # Lighten borders
     plt.gca().spines["top"].set_alpha(.0)
     plt.gca().spines["bottom"].set_alpha(.3)
