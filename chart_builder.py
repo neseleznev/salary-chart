@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import math
-from datetime import date
+from datetime import date, datetime
 from statistics import mode
 from typing import List, Any, Dict
 
@@ -13,6 +13,9 @@ from core.date_util import month_generator
 from core.models import EmploymentPeriod, Salary, Currency
 from core.purchasing_power_converter import purchasing_power_converters
 from core.salary_calculator.salary_calculator import SalaryCalculator
+
+OUT_PUT_DPI = 400
+OUTPUT_FORMAT = 'png'  # 'svg' supported
 
 # TITLE = 'Your relative salary'
 TITLE = 'Относительная з/п'
@@ -107,7 +110,7 @@ def build_graph(salary_data: List[EmploymentPeriod]):
     # plt.figure(figsize=(16, 10), dpi=80)
 
     fig, y_axis1 = plt.subplots()
-    fig.set_dpi(100)
+    fig.set_dpi(OUT_PUT_DPI)
     fig.set_figwidth(12)
     fig.set_figheight(8)
 
@@ -125,6 +128,11 @@ def build_graph(salary_data: List[EmploymentPeriod]):
     # instantiate a second axes that shares the same x-axis
     y_axis2 = y_axis1.twinx()
 
+    # Reorder sub-axis: main currency graph on top
+    y_axis1.zorder = 2
+    y_axis2.zorder = 1
+    y_axis1.patch.set_visible(False)  # hide the 'canvas'
+
     y_axis1.grid(True)
     y_axis2.grid(True)
 
@@ -132,7 +140,7 @@ def build_graph(salary_data: List[EmploymentPeriod]):
 
     add_legends(y_axis1, y_axis2)
     stylize_plot()
-    plt.savefig('salary.png')
+    plt.savefig('salary.%s' % OUTPUT_FORMAT)
     plt.show()
 
 
@@ -198,7 +206,10 @@ def draw_change_carets(data: GraphData, axis,
 
     for t in change_locations:
         axis.text(data.months[t], data.amounts[t] + amount_label_shift,
-                  data.months[t].strftime(YEAR_MONTH_FMT), horizontalalignment='center', color=caret_color)
+                  data.months[t].strftime(YEAR_MONTH_FMT),
+                  horizontalalignment='center',
+                  color='white',
+                  bbox=dict(facecolor=color, alpha=0.75))
 
 
 def get_change_locations(amounts: List[int], diff_sign: int) -> List[int]:
@@ -234,7 +245,7 @@ def stylize_plot():
     plt.gca().spines["right"].set_alpha(.0)
     plt.gca().spines["left"].set_alpha(.3)
 
-    plt.grid(axis='y', alpha=.3)
+    plt.grid(axis='y', alpha=.3, color=USD_COLOR)
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ however, real money he's getting (adjusted by purchasing power) increased just a
 
 Moreover, in USD equivalent, Vasiliy lost more than 25&nbsp;% of his salary.  
 
-![Sad Wasёq story](https://user-images.githubusercontent.com/6990568/82513387-85d56b00-9b1b-11ea-9ac6-4a2ddbeabee8.png "Sad Wasёq story")
+![Sad Wasёq story](https://github.com/neseleznev/salary-chart/blob/master/wasek.svg "Sad Wasёq story")
 
 
 ## Purchasing power data
