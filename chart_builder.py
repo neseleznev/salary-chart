@@ -13,6 +13,7 @@ from core.date_util import month_generator
 from core.models import EmploymentPeriod, Salary, Currency
 from core.purchasing_power_converter import purchasing_power_converters
 from core.salary_calculator.salary_calculator import SalaryCalculator
+from core.yearly_calculator.yearly_stats import print_yearly_stats
 
 OUT_PUT_DPI = 400
 OUTPUT_FORMAT = 'png'  # 'svg' supported
@@ -249,8 +250,12 @@ def stylize_plot():
 
 
 if __name__ == '__main__':
-    build_graph([
+    periods: List[EmploymentPeriod] = [
         EmploymentPeriod('Zavod, LLC', date(2014, 3, 1), date(2016, 3, 31), Salary(40000, Currency.RUB)),
         EmploymentPeriod('Zavod, LLC', date(2016, 4, 1), date(2018, 3, 31), Salary(50000, Currency.RUB)),
         EmploymentPeriod('Zavod, LLC', date(2018, 4, 1), datetime.now().date(), Salary(60000, Currency.RUB)),
-    ])
+    ]
+
+    print_yearly_stats(periods, [Currency.USD, Currency.EUR, Currency.RUB])
+
+    build_graph(periods)
