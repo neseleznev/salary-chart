@@ -47,14 +47,48 @@ def get_yearly_stats(periods: List[EmploymentPeriod],
 def print_yearly_stats(periods: List[EmploymentPeriod],
                        currencies: List[Currency]):
     yearly_stats = get_yearly_stats(periods, currencies)
-    yearly_usd_avg = dict()
 
+    _print_yearly_salary(yearly_stats)
+    _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=Currency.RUB)
+    _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=Currency.EUR)
+    _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=Currency.USD)
+
+
+def _print_yearly_salary(yearly_stats):
     print('Yearly salary:')
     for year, grouped_by_currency in yearly_stats.items():
         print(year)
         for currency, all_stats in grouped_by_currency.items():
             print('\t', currency, '{:.0f}'.format(all_stats['sum']), '\t', all_stats)
-            if currency == Currency.USD:
-                yearly_usd_avg[year] = int(all_stats['avg'])
-    print('Yearly USD average monthly salary:')
-    pprint(yearly_usd_avg, width=20)
+    print()
+
+
+def _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print):
+    print('Year-to-year average monthly salary change:')
+    yearly_avg = get_monthly_average_by_years(yearly_stats, currency_to_print)
+    salary_format = '{:7,d}'
+
+    result = dict()
+    yearly_avg_items = list(yearly_avg.items())
+    first_year, last_year_sum = yearly_avg_items[0]
+    result[first_year] = (salary_format + ' {}').format(last_year_sum, currency_to_print.name)
+
+    for i in range(1, len(yearly_avg_items)):
+        current_year_item = yearly_avg_items[i]
+        current_year, current_sum = current_year_item
+        percent_change = int((current_sum / last_year_sum - 1) * 100)
+        result[current_year] = (salary_format + ' {}   | {:+4} %').format(current_sum,
+                                                                          currency_to_print.name,
+                                                                          percent_change)
+        last_year_sum = current_sum
+
+    pprint(result, width=40)
+
+
+def get_monthly_average_by_years(yearly_stats, currency_to_print):
+    result = dict()
+    for year, grouped_by_currency in yearly_stats.items():
+        for currency, all_stats in grouped_by_currency.items():
+            if currency == currency_to_print:
+                result[year] = int(all_stats['avg'])
+    return result
