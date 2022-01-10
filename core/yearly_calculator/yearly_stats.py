@@ -49,9 +49,8 @@ def print_yearly_stats(periods: List[EmploymentPeriod],
     yearly_stats = get_yearly_stats(periods, currencies)
 
     _print_yearly_salary(yearly_stats)
-    _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=Currency.RUB)
-    _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=Currency.EUR)
-    _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=Currency.USD)
+    for currency in currencies:
+        _print_year_to_year_monthly_average_change(yearly_stats, currency_to_print=currency)
 
 
 def _print_yearly_salary(yearly_stats):
