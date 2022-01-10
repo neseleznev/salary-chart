@@ -37,6 +37,8 @@ LATEST_VALUE_CHANGE_COLOR = '#757575'  # 'grey'
 USD_SALARY_LABEL = 'Зарплата в USD'
 USD_COLOR = '#4CAF50'  # 'darkgreen'
 
+ENABLE_INCREASE_DECREASE_CARETS = False
+
 # INCREASE_LABEL = 'Increase'
 INCREASE_LABEL = 'Повышение'
 INCREASE_COLOR = '#037149'
@@ -156,8 +158,9 @@ def draw_main_currency_line(data: EmploymentData, axis):
               color=MAIN_CURRENCY_COLOR,
               label=f'{MAIN_CURRENCY_SALARY_LABEL} ({main_currency.name})')
 
-    draw_increase_carets(main_data, axis, 10)
-    draw_decrease_carets(main_data, axis, 10)
+    if ENABLE_INCREASE_DECREASE_CARETS:
+        draw_increase_carets(main_data, axis, 10)
+        draw_decrease_carets(main_data, axis, 10)
 
 
 def draw_value_change_line(data: EmploymentData, axis):
