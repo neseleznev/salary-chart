@@ -109,7 +109,8 @@ def filter_by_indices(values: List[Any], indices: List[int]):
     return [val for idx, val in enumerate(values) if idx in indices]
 
 
-def build_graph(salary_data: List[EmploymentPeriod]):
+def build_graph(salary_data: List[EmploymentPeriod],
+                main_currency: Currency):
     # plt.figure(figsize=(16, 10), dpi=80)
 
     fig, y_axis1 = plt.subplots()
@@ -125,7 +126,7 @@ def build_graph(salary_data: List[EmploymentPeriod]):
 
     fig.autofmt_xdate()
 
-    draw_main_currency_line(data, y_axis1)
+    draw_main_currency_line(data, main_currency, y_axis1)
     draw_value_change_line(data, y_axis1)
 
     # instantiate a second axes that shares the same x-axis
@@ -147,8 +148,7 @@ def build_graph(salary_data: List[EmploymentPeriod]):
     plt.show()
 
 
-def draw_main_currency_line(data: EmploymentData, axis):
-    main_currency = data.most_frequent_currency
+def draw_main_currency_line(data: EmploymentData, main_currency: Currency, axis):
     main_data = data.salaries(main_currency)
 
     axis.set_ylabel(main_currency.name, color=MAIN_CURRENCY_COLOR)
@@ -260,5 +260,4 @@ if __name__ == '__main__':
     ]
 
     print_yearly_stats(periods, [Currency.USD, Currency.EUR, Currency.RUB])
-
-    build_graph(periods)
+    build_graph(periods, Currency.RUB)
