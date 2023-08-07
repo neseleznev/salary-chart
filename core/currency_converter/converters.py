@@ -10,7 +10,6 @@ from ..models import EmploymentPeriod, Currency
 __all__ = ['CurrencySalaryConverter']
 
 FULL_DATA_CURRENCY_RATES_DATA_URL = 'http://www.ecb.int/stats/eurofxref/eurofxref-hist.zip'
-CONVENTIONAL_POSTWAR_USD_RUB_RATE = 60
 
 
 class CurrencySalaryConverter:
@@ -45,17 +44,60 @@ class CurrencySalaryConverter:
                                                     new_currency.name,
                                                     dt)
         except RateNotFoundError:
-            if dt >= date(2022, 4, 1):
+            conventional_usd_rub_rate = self.get_conventional_usd_rub_rate(dt)
+
+            if conventional_usd_rub_rate:
                 if new_currency == Currency.RUB:
                     usd_amount = self._currency_converter.convert(period.salary.amount,
                                                                   period.salary.currency.name,
                                                                   Currency.USD.name,
                                                                   dt)
-                    return CONVENTIONAL_POSTWAR_USD_RUB_RATE * usd_amount
+                    return conventional_usd_rub_rate * usd_amount
                 if period.salary.currency == Currency.RUB:
-                    usd_amount = 1. / CONVENTIONAL_POSTWAR_USD_RUB_RATE * period.salary.amount
+                    usd_amount = 1. / conventional_usd_rub_rate * period.salary.amount
                     return self._currency_converter.convert(usd_amount,
                                                             Currency.USD.name,
                                                             new_currency.name,
                                                             dt)
             return None
+
+    @staticmethod
+    def get_conventional_usd_rub_rate(conversion_date):
+        """
+        Source: https://www.x-rates.com/average/?from=USD&to=RUB&amount=1&year=2023
+        """
+        if conversion_date >= date(2023, 8, 1):
+            return 93.77  # TODO update
+        if conversion_date >= date(2023, 7, 1):
+            return 90.51
+        if conversion_date >= date(2023, 6, 1):
+            return 83.04
+        if conversion_date >= date(2023, 5, 1):
+            return 78.96
+        if conversion_date >= date(2023, 4, 1):
+            return 80.88
+        if conversion_date >= date(2023, 3, 1):
+            return 76.28
+        if conversion_date >= date(2023, 2, 1):
+            return 73.13
+        if conversion_date >= date(2023, 1, 1):
+            return 70.06
+        if conversion_date >= date(2022, 12, 1):
+            return 65.63
+        if conversion_date >= date(2022, 11, 1):
+            return 61.02
+        if conversion_date >= date(2022, 10, 1):
+            return 61.51
+        if conversion_date >= date(2022, 9, 1):
+            return 60.19
+        if conversion_date >= date(2022, 8, 1):
+            return 60.80
+        if conversion_date >= date(2022, 7, 1):
+            return 59.14
+        if conversion_date >= date(2022, 6, 1):
+            return 58.01
+        if conversion_date >= date(2022, 5, 1):
+            return 65.79
+        if conversion_date >= date(2022, 4, 1):
+            return 80.93
+        return None
