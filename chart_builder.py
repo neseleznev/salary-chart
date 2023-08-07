@@ -16,7 +16,7 @@ from core.salary_calculator.salary_calculator import SalaryCalculator
 from core.yearly_calculator.yearly_stats import print_yearly_stats
 
 OUT_PUT_DPI = 400
-OUTPUT_FORMAT = 'png'  # 'svg' supported
+OUTPUT_FORMAT = 'svg'  # 'png' is also supported
 
 # TITLE = 'Your relative salary'
 TITLE = 'Относительная з/п'
