@@ -66,8 +66,14 @@ class CurrencySalaryConverter:
         """
         Source: https://www.x-rates.com/average/?from=USD&to=RUB&amount=1&year=2023
         """
+        if conversion_date >= date(2023, 11, 1):
+            return 92.80  # TODO update
+        if conversion_date >= date(2023, 10, 1):
+            return 97.22
+        if conversion_date >= date(2023, 9, 1):
+            return 96.44
         if conversion_date >= date(2023, 8, 1):
-            return 95.68  # TODO update
+            return 95.60
         if conversion_date >= date(2023, 7, 1):
             return 90.51
         if conversion_date >= date(2023, 6, 1):
