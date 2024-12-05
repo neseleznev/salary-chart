@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from typing import Union
 
 
 class Currency(Enum):
@@ -52,8 +53,8 @@ class Currency(Enum):
 
 
 class Salary:
-    def __init__(self, amount: int, currency: Currency):
-        self.amount = amount
+    def __init__(self, amount: Union[int, float], currency: Currency):
+        self.amount = int(amount)
         self.currency = currency
 
 

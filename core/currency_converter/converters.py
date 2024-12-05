@@ -64,10 +64,36 @@ class CurrencySalaryConverter:
     @staticmethod
     def get_conventional_usd_rub_rate(conversion_date):
         """
-        Source: https://www.x-rates.com/average/?from=USD&to=RUB&amount=1&year=2023
+        Source: https://www.x-rates.com/average/?from=USD&to=RUB&amount=1&year=2024
         """
+        if conversion_date >= date(2025, 1, 1):
+            return 107.20  # TODO update
+        if conversion_date >= date(2024, 12, 1):
+            return 107.20  # TODO update
+        if conversion_date >= date(2024, 11, 1):
+            return 100.69
+        if conversion_date >= date(2024, 10, 1):
+            return 96.09
+        if conversion_date >= date(2024, 9, 1):
+            return 91.19
+        if conversion_date >= date(2024, 8, 1):
+            return 89.49
+        if conversion_date >= date(2024, 7, 1):
+            return 88.42
+        if conversion_date >= date(2024, 6, 1):
+            return 89.41
+        if conversion_date >= date(2024, 5, 1):
+            return 91.0
+        if conversion_date >= date(2024, 4, 1):
+            return 92.11
+        if conversion_date >= date(2024, 3, 1):
+            return 91.47
+        if conversion_date >= date(2024, 2, 1):
+            return 91.41
+        if conversion_date >= date(2024, 1, 1):
+            return 90.18
         if conversion_date >= date(2023, 12, 1):
-            return 90  # TODO update
+            return 90.97
         if conversion_date >= date(2023, 11, 1):
             return 90.59
         if conversion_date >= date(2023, 10, 1):
